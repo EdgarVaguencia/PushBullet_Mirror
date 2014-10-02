@@ -17878,7 +17878,7 @@ module.exports = Backbone.Router.extend({
     if(this.websocket != null){
       this.websocket.close();
     }
-    this.websocket = new WebSocket('wss://stream.pushbullet.com/websocket/v1zVtLfrBTdQdfh0xThlJXb3W6tJ139SUUuju5vRCCUuW');
+    this.websocket = new WebSocket('wss://stream.pushbullet.com/websocket/SUkv5ULjSEJ1MaA4VvCp6o8jXKSScnqP');
     this.websocket.onopen = function(e){
       self.websocketOpen(e);
     }
@@ -17922,7 +17922,7 @@ module.exports = Backbone.View.extend({
 
   classname : 'push',
 
-  templateHtml : '<h1>{{push.title}}</h1><p class="pushBody">{{push.body}}</p><p class="application">{{push.application_name}}</p>',
+  templateHtml : '<h1>{{push.title}}</h1><p class="pushBody">{{push.body}}</p><p class="details"><span class="application">{{push.application_name}}</span><span class="date">{{date}}</span></p>',
 
   initialize : function(){
     this.listenTo(this.model,'change',this.render,this);
