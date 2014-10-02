@@ -3,4 +3,23 @@ var Backbone = require('backbone'),
     $ = require('jquery');
 
 module.exports = Backbone.View.extend({
-})
+
+  tagname : 'article',
+
+  classname : 'push',
+
+  templateHtml : '<h1>{{push.title}}</h1><p class="pushBody">{{push.body}}</p><p class="application">{{push.application_name}}</p>',
+
+  initialize : function(){
+    this.listenTo(this.model,'change',this.render,this);
+  },
+
+  render : function(){
+    var push = this.model.toJSON(),
+        template = Handlebars.compile(this.templateHtml),
+        html = template(push);
+    this.$el.html(html);
+    return this;
+  }
+
+});

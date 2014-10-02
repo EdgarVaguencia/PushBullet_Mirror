@@ -2,41 +2,49 @@ var Backbone = require('backbone'),
     $ = require('jquery'),
     PushCollection = require('../collections/push'),
     PushModel = require('../models/push'),
-    PushView = require('../views/push');
+    PushViewList = require('../views/pushes');
 
 module.exports = Backbone.Router.extend({
   routes : {
     '' : 'main'
   },
   initialize : function(){
+    this.pushes = new PushCollection();
+    this.PushList = new PushViewList({ collection : this.pushes });
     Backbone.history.start();
   },
   main : function(){
     this.connect();
   },
   connect : function(){
+    var self = this;
     if(this.websocket != null){
       this.websocket.close();
     }
-    this.websocket = new WebSocket('wss://stream.pushbullet.com/websocket/v1zVtLfrBTdQdfh0xThlJXb3W6tJ139SUUuju5vRCCUuW');
+    this.websocket = new WebSocket('wss://stream.pushbullet.com/websocket/<Access Token>');
     this.websocket.onopen = function(e){
-      this.websocketOpen(e);
+      self.websocketOpen(e);
     }
     this.websocket.onmessage = function(e){
-      this.websocketMessage(e);
+      self.websocketMessage(e);
     }
     this.websocket.onerror = function(e){
-      this.websocketError(e);
+      self.websocketError(e);
     }
     this.websocket.onclose = function(e){
-      this.websocketClose(e);
+      self.websocketClose(e);
     }
   },
   websocketOpen : function(e){
     console.log('WebSocket Open');
   },
   websocketMessage : function(e){
-    console.log(e.data);
+    var self = this;
+    //console.log(e.data);
+    var json = JSON.parse(e.data);
+    if( json.type == 'push' && json.push.type == 'mirror' ){
+      self.pushes.add(new PushModel(json));
+    }
   },
   websocketError : function(e){
     console.log('WebSocket Error');

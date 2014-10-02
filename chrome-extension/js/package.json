@@ -24,6 +24,7 @@
     "backbone.paginator": "^2.0.2",
     "browserify": "^5.12.1",
     "handlebars": "^2.0.0",
-    "jquery": "^1.11.1"
+    "jquery": "^1.11.1",
+    "node-static": "^0.7.6"
   }
 }
