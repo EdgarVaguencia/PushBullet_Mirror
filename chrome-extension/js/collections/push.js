@@ -4,7 +4,8 @@ var Backbone = require('backbone'),
 module.exports = Backbone.PageableCollection.extend({
   model : Push,
   state : {
-    pageSize : 10
+    pageSize : 10,
+    order : 1
   },
   mode : 'client'
 });

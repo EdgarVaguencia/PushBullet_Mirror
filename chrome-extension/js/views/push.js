@@ -8,7 +8,7 @@ module.exports = Backbone.View.extend({
 
   classname : 'push',
 
-  templateHtml : '<h1>{{push.title}}</h1><p class="pushBody">{{push.body}}</p><p class="details"><span class="application">{{push.application_name}}</span><span class="date">{{date}}</span></p>',
+  templateHtml : '<img src="{{#if push.icon}}data:image/png;base64,{{push.icon}}{{else}}https://blog.pushbullet.com/images/iphone_app_update_1/icon2.png{{/if}}" /><h1>{{push.title}}</h1><p class="pushBody">{{push.body}}</p><p class="details"><span class="application">{{push.application_name}}</span><span class="date">{{created}}</span></p>',
 
   initialize : function(){
     this.listenTo(this.model,'change',this.render,this);

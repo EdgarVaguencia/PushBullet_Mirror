@@ -5,7 +5,8 @@ var Backbone = require('backbone'),
 module.exports = Backbone.PageableCollection.extend({
   model : Push,
   state : {
-    pageSize : 10
+    pageSize : 10,
+    order : 1
   },
   mode : 'client'
 });
@@ -17899,7 +17900,14 @@ module.exports = Backbone.Router.extend({
     var self = this;
     //console.log(e.data);
     var json = JSON.parse(e.data);
-    if( json.type == 'push' && json.push.type == 'mirror' ){
+    if( json.type == 'push' && json.push.type !== 'dismissal' ){
+      json.created = Date.now();
+      if( !json.push.title ){
+        json.push.title = 'Push';
+      }
+      if( !json.push.application_name ){
+        json.push.application_name = 'PushBullet';
+      }
       self.pushes.add(new PushModel(json));
     }
   },
@@ -17922,7 +17930,7 @@ module.exports = Backbone.View.extend({
 
   classname : 'push',
 
-  templateHtml : '<h1>{{push.title}}</h1><p class="pushBody">{{push.body}}</p><p class="details"><span class="application">{{push.application_name}}</span><span class="date">{{date}}</span></p>',
+  templateHtml : '<img src="{{#if push.icon}}data:image/png;base64,{{push.icon}}{{else}}https://blog.pushbullet.com/images/iphone_app_update_1/icon2.png{{/if}}" /><h1>{{push.title}}</h1><p class="pushBody">{{push.body}}</p><p class="details"><span class="application">{{push.application_name}}</span><span class="date">{{created}}</span></p>',
 
   initialize : function(){
     this.listenTo(this.model,'change',this.render,this);
@@ -17948,12 +17956,19 @@ module.exports = Backbone.View.extend({
   el : $('#body'),
 
   initialize : function(){
-    this.listenTo(this.collection,'add',this.addNew,this);
+    this.listenTo(this.collection,'add',this.render,this);
   },
 
   addNew : function(push){
     var pushView = new PushView({model : push});
     this.$el.append(pushView.render().el);
+  },
+
+  render : function(){
+    this.collection.setSorting('created');
+    this.collection.fullCollection.sort();
+    this.$el.html('');
+    this.collection.forEach(this.addNew,this);
   }
 });
 

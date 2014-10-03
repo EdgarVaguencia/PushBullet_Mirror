@@ -21,7 +21,7 @@ module.exports = Backbone.Router.extend({
     if(this.websocket != null){
       this.websocket.close();
     }
-    this.websocket = new WebSocket('wss://stream.pushbullet.com/websocket/<Access Token>');
+    this.websocket = new WebSocket('wss://stream.pushbullet.com/websocket/SUkv5ULjSEJ1MaA4VvCp6o8jXKSScnqP');
     this.websocket.onopen = function(e){
       self.websocketOpen(e);
     }
@@ -42,7 +42,14 @@ module.exports = Backbone.Router.extend({
     var self = this;
     //console.log(e.data);
     var json = JSON.parse(e.data);
-    if( json.type == 'push' && json.push.type == 'mirror' ){
+    if( json.type == 'push' && json.push.type !== 'dismissal' ){
+      json.created = Date.now();
+      if( !json.push.title ){
+        json.push.title = 'Push';
+      }
+      if( !json.push.application_name ){
+        json.push.application_name = 'PushBullet';
+      }
       self.pushes.add(new PushModel(json));
     }
   },
