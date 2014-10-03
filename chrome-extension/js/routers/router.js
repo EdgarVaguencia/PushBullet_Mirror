@@ -21,7 +21,7 @@ module.exports = Backbone.Router.extend({
     if(this.websocket != null){
       this.websocket.close();
     }
-    this.websocket = new WebSocket('wss://stream.pushbullet.com/websocket/SUkv5ULjSEJ1MaA4VvCp6o8jXKSScnqP');
+    this.websocket = new WebSocket('wss://stream.pushbullet.com/websocket/<access token>');
     this.websocket.onopen = function(e){
       self.websocketOpen(e);
     }
