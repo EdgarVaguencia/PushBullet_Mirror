@@ -6,7 +6,8 @@ var Backbone = require('backbone'),
 
 module.exports = Backbone.Router.extend({
   routes : {
-    '' : 'main'
+    '' : 'main',
+    'timeline' : 'main'
   },
   initialize : function(){
     this.pushes = new PushCollection();
@@ -14,25 +15,28 @@ module.exports = Backbone.Router.extend({
     Backbone.history.start();
   },
   main : function(){
-    this.connect();
+    var keyCode = $('#key_code').val();
+    this.connect(keyCode);
   },
-  connect : function(){
+  connect : function(keyCode){
     var self = this;
-    if(this.websocket != null){
+    if(this.websocket){
       this.websocket.close();
     }
-    this.websocket = new WebSocket('wss://stream.pushbullet.com/websocket/<access token>');
-    this.websocket.onopen = function(e){
-      self.websocketOpen(e);
-    }
-    this.websocket.onmessage = function(e){
-      self.websocketMessage(e);
-    }
-    this.websocket.onerror = function(e){
-      self.websocketError(e);
-    }
-    this.websocket.onclose = function(e){
-      self.websocketClose(e);
+    if( keyCode ){
+      this.websocket = new WebSocket('wss://stream.pushbullet.com/websocket/'+keyCode);
+      this.websocket.onopen = function(e){
+        self.websocketOpen(e);
+      }
+      this.websocket.onmessage = function(e){
+        self.websocketMessage(e);
+      }
+      this.websocket.onerror = function(e){
+        self.websocketError(e);
+      }
+      this.websocket.onclose = function(e){
+        self.websocketClose(e);
+      }
     }
   },
   websocketOpen : function(e){
@@ -58,5 +62,8 @@ module.exports = Backbone.Router.extend({
   },
   websocketClose : function(e){
     console.log('WebSocket Close');
+  },
+  options : function(){
+    console.log('Página de opciones');
   }
 });
