@@ -15,6 +15,7 @@ module.exports = Backbone.Router.extend({
     Backbone.history.start();
   },
   main : function(){
+    chrome.storage.sync.set({'key'},"WvuQuzwEHIgTeshcUIThEvSrMqAbGHTb");
     var keyCode = $('#key_code').val();
     this.connect(keyCode);
   },
