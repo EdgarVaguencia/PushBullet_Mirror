@@ -4384,7 +4384,7 @@ module.exports = Backbone.Model.extend({});
 
 },{"underscore":7}],7:[function(require,module,exports){
 module.exports=require(5)
-},{"/home/edgar/Documentos/ProyectosFree/PushBullet_Mirror/chrome-extension/js/node_modules/backbone.paginator/node_modules/underscore/underscore.js":5}],8:[function(require,module,exports){
+},{"E:\\Documents\\ProyectosFree\\PushBullet_Mirror\\chrome-extension\\js\\node_modules\\backbone.paginator\\node_modules\\underscore\\underscore.js":5}],8:[function(require,module,exports){
 
 },{}],9:[function(require,module,exports){
 "use strict";
@@ -17943,10 +17943,6 @@ module.exports = Backbone.Router.extend({
     this.main();
   },
 
-  options : function(){
-    console.log('Página de opciones');
-  },
-
 });
 
 },{"../collections/push":1,"../models/push":3,"../views/pushes":28,"backbone":6,"jquery":25}],27:[function(require,module,exports){
@@ -17967,18 +17963,27 @@ module.exports = Backbone.View.extend({
   },
 
   render : function(){
-    var push = this.model.toJSON(),
-        template = Handlebars.compile(this.templateHtml),
-        html = template(push);
+    console.log(this.model.toJSON());
+    var push = this.model.toJSON();
+        // template = Handlebars.compile(this.templateHtml),
+        // html = template(push);
+    var html = '<img src=';
+    if( push.push.icon ){
+      html += '"data:image/png;base64,'+push.push.icon+'"';
+    }else{
+      html += '"https://blog.pushbullet.com/images/iphone_app_update_1/icon2.png"';
+    }
+    html += ' /><h1>'+push.push.title+'</h1><p class="pushBody">'+push.push.body+'</p><p class="details"><span class="application">'+push.push.application_name+'</span><span class="date">'+push.created+'</span></p>';
     this.$el.html(html);
     return this;
-  }
+  },
 
 });
 
 },{"backbone":6,"handlebars":24,"jquery":25}],28:[function(require,module,exports){
 var Backbone = require('backbone'),
     Handlebars = require('handlebars'),
+    PushModel = require('../models/push'),
     PushView = require('../views/push'),
     $ = require('jquery');
 
@@ -17986,18 +17991,12 @@ module.exports = Backbone.View.extend({
   el : $('body'),
 
   initialize : function(){
-    //$('#options').hide();
     this.listenTo(this.collection,'add',this.render,this);
   },
 
-  events : {
-    //'click #view_Timeline' : "viewTimeLine",
-    //'click #view_Options' : "viewOptions",
-    //'change #key_code' : ''
-  },
-
   addNew : function(push){
-    var pushView = new PushView({model : push});
+    var pushModel = new PushModel(push);
+    var pushView = new PushView({model : pushModel});
     $('#body').append(pushView.render().el);
   },
 
@@ -18005,34 +18004,18 @@ module.exports = Backbone.View.extend({
     this.collection.setSorting('created');
     this.collection.fullCollection.sort();
     localStorage['pushes'] = JSON.stringify(this.collection.toJSON());
-    //$('#body').html('');
-    //this.collection.forEach(this.addNew,this);
   },
 
   viewTimeLine : function(){
-    //$('#options').hide();
-    //$('#body').show();
-    //Backbone.app.navigate('timeline',{ trigger : true });
-    if( this.collection.length > 0 ){
-      this.collection.forEach(this.addNew,this);
-    }else{
-      if( localStorage.pushes ){
-        var pushes = JSON.parse(localStorage.getItem('pushes'));
-        var self = this;
-        $.each(pushes,function(k,i){
-          //self.addNew(i);
-          console.log(i);
-        });
-      }
+    if( localStorage.pushes ){
+      var pushes = JSON.parse(localStorage.getItem('pushes'));
+      var self = this;
+      $.each(pushes,function(k,i){
+        self.addNew(i);
+      });
     }
-  },
-
-  viewOptions : function(){
-    //$('#body').hide();
-    //$('#options').show();
-    //Backbone.app.navigate('option',{ trigger : true });
   },
 
 });
 
-},{"../views/push":27,"backbone":6,"handlebars":24,"jquery":25}]},{},[2]);
+},{"../models/push":3,"../views/push":27,"backbone":6,"handlebars":24,"jquery":25}]},{},[2]);

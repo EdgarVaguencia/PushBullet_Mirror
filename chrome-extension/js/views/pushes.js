@@ -1,5 +1,6 @@
 var Backbone = require('backbone'),
-    Handlebars = require('handlebars'),
+    // Handlebars = require('handlebars'),
+    PushModel = require('../models/push'),
     PushView = require('../views/push'),
     $ = require('jquery');
 
@@ -7,18 +8,12 @@ module.exports = Backbone.View.extend({
   el : $('body'),
 
   initialize : function(){
-    //$('#options').hide();
     this.listenTo(this.collection,'add',this.render,this);
   },
 
-  events : {
-    //'click #view_Timeline' : "viewTimeLine",
-    //'click #view_Options' : "viewOptions",
-    //'change #key_code' : ''
-  },
-
   addNew : function(push){
-    var pushView = new PushView({model : push});
+    var pushModel = new PushModel(push);
+    var pushView = new PushView({model : pushModel});
     $('#body').append(pushView.render().el);
   },
 
@@ -26,32 +21,16 @@ module.exports = Backbone.View.extend({
     this.collection.setSorting('created');
     this.collection.fullCollection.sort();
     localStorage['pushes'] = JSON.stringify(this.collection.toJSON());
-    //$('#body').html('');
-    //this.collection.forEach(this.addNew,this);
   },
 
   viewTimeLine : function(){
-    //$('#options').hide();
-    //$('#body').show();
-    //Backbone.app.navigate('timeline',{ trigger : true });
-    if( this.collection.length > 0 ){
-      this.collection.forEach(this.addNew,this);
-    }else{
-      if( localStorage.pushes ){
-        var pushes = JSON.parse(localStorage.getItem('pushes'));
-        var self = this;
-        $.each(pushes,function(k,i){
-          //self.addNew(i);
-          console.log(i);
-        });
-      }
+    if( localStorage.pushes ){
+      var pushes = JSON.parse(localStorage.getItem('pushes'));
+      var self = this;
+      $.each(pushes,function(k,i){
+        self.addNew(i);
+      });
     }
-  },
-
-  viewOptions : function(){
-    //$('#body').hide();
-    //$('#options').show();
-    //Backbone.app.navigate('option',{ trigger : true });
   },
 
 });

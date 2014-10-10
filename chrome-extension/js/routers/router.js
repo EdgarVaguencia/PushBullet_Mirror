@@ -85,8 +85,4 @@ module.exports = Backbone.Router.extend({
     this.main();
   },
 
-  options : function(){
-    console.log('Página de opciones');
-  },
-
 });
