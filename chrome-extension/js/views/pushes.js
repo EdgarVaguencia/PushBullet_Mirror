@@ -7,14 +7,14 @@ module.exports = Backbone.View.extend({
   el : $('body'),
 
   initialize : function(){
-    $('#options').hide();
+    //$('#options').hide();
     this.listenTo(this.collection,'add',this.render,this);
   },
 
   events : {
-    'click #view_Timeline' : "viewTimeLine",
-    'click #view_Options' : "viewOptions",
-    'change #key_code' : ''
+    //'click #view_Timeline' : "viewTimeLine",
+    //'click #view_Options' : "viewOptions",
+    //'change #key_code' : ''
   },
 
   addNew : function(push){
@@ -25,20 +25,33 @@ module.exports = Backbone.View.extend({
   render : function(){
     this.collection.setSorting('created');
     this.collection.fullCollection.sort();
-    $('#body').html('');
-    this.collection.forEach(this.addNew,this);
+    localStorage['pushes'] = JSON.stringify(this.collection.toJSON());
+    //$('#body').html('');
+    //this.collection.forEach(this.addNew,this);
   },
 
   viewTimeLine : function(){
-    $('#options').hide();
-    $('#body').show();
-    Backbone.app.navigate('timeline',{ trigger : true });
+    //$('#options').hide();
+    //$('#body').show();
+    //Backbone.app.navigate('timeline',{ trigger : true });
+    if( this.collection.length > 0 ){
+      this.collection.forEach(this.addNew,this);
+    }else{
+      if( localStorage.pushes ){
+        var pushes = JSON.parse(localStorage.getItem('pushes'));
+        var self = this;
+        $.each(pushes,function(k,i){
+          //self.addNew(i);
+          console.log(i);
+        });
+      }
+    }
   },
 
   viewOptions : function(){
-    $('#body').hide();
-    $('#options').show();
-    Backbone.app.navigate('option',{ trigger : true });
+    //$('#body').hide();
+    //$('#options').show();
+    //Backbone.app.navigate('option',{ trigger : true });
   },
 
 });

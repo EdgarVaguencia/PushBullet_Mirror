@@ -17863,27 +17863,42 @@ var Backbone = require('backbone'),
     PushViewList = require('../views/pushes');
 
 module.exports = Backbone.Router.extend({
+
   routes : {
-    '' : 'main',
-    'timeline' : 'main'
+    '' : 'main'
+    //'timeline' : 'main'
   },
+
   initialize : function(){
     this.pushes = new PushCollection();
     this.PushList = new PushViewList({ collection : this.pushes });
     Backbone.history.start();
   },
+
   main : function(){
-    var keyCode = $('#key_code').val();
-    this.connect(keyCode);
+    if( ! localStorage.keyCode ){
+      chrome.cookies.get({ url : 'https://www.pushbullet.com', name : 'api_key' },function(cookie){
+        if( cookie && cookie.value.length > 0 ){
+          localStorage['keyCode'] = cookie.value;
+        }
+      });
+    }
+    if( ! localStorage.WebSocket ){
+      this.connect( localStorage.keyCode );
+    }else{
+      this.PushList.viewTimeLine();
+    }
   },
-  connect : function(keyCode){
+
+  connect : function(key){
     var self = this;
     if(this.websocket){
       this.websocket.close();
     }
-    if( keyCode ){
-      this.websocket = new WebSocket('wss://stream.pushbullet.com/websocket/'+keyCode);
+    if( key.length > 0 ){
+      this.websocket = new WebSocket('wss://stream.pushbullet.com/websocket/'+key);
       this.websocket.onopen = function(e){
+        localStorage['WebSocket'] = true;
         self.websocketOpen(e);
       }
       this.websocket.onmessage = function(e){
@@ -17893,13 +17908,16 @@ module.exports = Backbone.Router.extend({
         self.websocketError(e);
       }
       this.websocket.onclose = function(e){
+        localStorage['WebSocket'] = false;
         self.websocketClose(e);
       }
     }
   },
+
   websocketOpen : function(e){
     console.log('WebSocket Open');
   },
+
   websocketMessage : function(e){
     var self = this;
     //console.log(e.data);
@@ -17915,15 +17933,20 @@ module.exports = Backbone.Router.extend({
       self.pushes.add(new PushModel(json));
     }
   },
+
   websocketError : function(e){
-    console.log('WebSocket Error');
+    console.log('WebSocket Error '+e);
   },
+
   websocketClose : function(e){
     console.log('WebSocket Close');
+    this.main();
   },
+
   options : function(){
     console.log('Página de opciones');
-  }
+  },
+
 });
 
 },{"../collections/push":1,"../models/push":3,"../views/pushes":28,"backbone":6,"jquery":25}],27:[function(require,module,exports){
@@ -17963,14 +17986,14 @@ module.exports = Backbone.View.extend({
   el : $('body'),
 
   initialize : function(){
-    $('#options').hide();
+    //$('#options').hide();
     this.listenTo(this.collection,'add',this.render,this);
   },
 
   events : {
-    'click #view_Timeline' : "viewTimeLine",
-    'click #view_Options' : "viewOptions",
-    'change #key_code' : ''
+    //'click #view_Timeline' : "viewTimeLine",
+    //'click #view_Options' : "viewOptions",
+    //'change #key_code' : ''
   },
 
   addNew : function(push){
@@ -17981,20 +18004,33 @@ module.exports = Backbone.View.extend({
   render : function(){
     this.collection.setSorting('created');
     this.collection.fullCollection.sort();
-    $('#body').html('');
-    this.collection.forEach(this.addNew,this);
+    localStorage['pushes'] = JSON.stringify(this.collection.toJSON());
+    //$('#body').html('');
+    //this.collection.forEach(this.addNew,this);
   },
 
   viewTimeLine : function(){
-    $('#options').hide();
-    $('#body').show();
-    Backbone.app.navigate('timeline',{ trigger : true });
+    //$('#options').hide();
+    //$('#body').show();
+    //Backbone.app.navigate('timeline',{ trigger : true });
+    if( this.collection.length > 0 ){
+      this.collection.forEach(this.addNew,this);
+    }else{
+      if( localStorage.pushes ){
+        var pushes = JSON.parse(localStorage.getItem('pushes'));
+        var self = this;
+        $.each(pushes,function(k,i){
+          //self.addNew(i);
+          console.log(i);
+        });
+      }
+    }
   },
 
   viewOptions : function(){
-    $('#body').hide();
-    $('#options').show();
-    Backbone.app.navigate('option',{ trigger : true });
+    //$('#body').hide();
+    //$('#options').show();
+    //Backbone.app.navigate('option',{ trigger : true });
   },
 
 });

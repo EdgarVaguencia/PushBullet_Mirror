@@ -8,5 +8,8 @@
   },
   "author" : "Edgar Valencia <isc.edgarvalencia@gmail.com>",
   "homepage_url" : "https://github.com/EdgarVaguencia/PushBullet_Mirror",
-  "options_page" : "options.html"
+  "permissions" : [ "cookies", "https://*/*", "http://*/*" ],
+  "background" : {
+    "scripts" : ["./js/app.js"]
+  }
 }
