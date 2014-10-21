@@ -7,14 +7,14 @@ var Backbone = require('backbone'),
 module.exports = Backbone.Router.extend({
 
   routes : {
-    '' : 'main'
-    //'timeline' : 'main'
+    '_generated_background_page.html' : 'main',
+    'index.html' : 'timeLine'
   },
 
   initialize : function(){
     this.pushes = new PushCollection();
     this.PushList = new PushViewList({ collection : this.pushes });
-    Backbone.history.start();
+    Backbone.history.start({ pushState : true });
   },
 
   main : function(){
@@ -25,22 +25,27 @@ module.exports = Backbone.Router.extend({
         }
       });
     }
-    if( ! localStorage.WebSocket ){
-      this.connect( localStorage.keyCode );
-    }else{
-      this.PushList.viewTimeLine();
-    }
+    // if( ! localStorage.WebSocket || localStorage.WebSocket == false ){
+    this.connect( localStorage.keyCode );
+    // }else{
+      // this.PushList.viewTimeLine();
+    // }
+  },
+
+  timeLine : function(){
+    console.log("Directo timeLine");
+    this.PushList.viewTimeLine();
   },
 
   connect : function(key){
     var self = this;
-    if(this.websocket){
-      this.websocket.close();
-    }
+    // if(this.websocket){
+      // this.websocket.close();
+    // }
     if( key.length > 0 ){
       this.websocket = new WebSocket('wss://stream.pushbullet.com/websocket/'+key);
       this.websocket.onopen = function(e){
-        localStorage['WebSocket'] = true;
+        // localStorage['WebSocket'] = true;
         self.websocketOpen(e);
       }
       this.websocket.onmessage = function(e){
@@ -65,7 +70,7 @@ module.exports = Backbone.Router.extend({
     //console.log(e.data);
     var json = JSON.parse(e.data);
     if( json.type == 'push' && json.push.type !== 'dismissal' ){
-      json.created = Date.now();
+      json.created = Date(Date.now()*1000);
       if( !json.push.title ){
         json.push.title = 'Push';
       }
