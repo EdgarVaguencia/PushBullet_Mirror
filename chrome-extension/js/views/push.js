@@ -17,8 +17,6 @@ module.exports = Backbone.View.extend({
   render : function(){
     console.log(this.model.toJSON());
     var push = this.model.toJSON();
-        // template = Handlebars.compile(this.templateHtml),
-        // html = template(push);
     var html = '<img src=';
     if( push.push.icon ){
       html += '"data:image/png;base64,'+push.push.icon+'"';

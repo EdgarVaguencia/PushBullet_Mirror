@@ -23,7 +23,7 @@ $(function(){
   Backbone.app = new Router();
 });
 
-},{"./routers/router":9,"backbone":6,"backbone.paginator":4,"jquery":8}],3:[function(require,module,exports){
+},{"./routers/router":10,"backbone":6,"backbone.paginator":4,"jquery":8}],3:[function(require,module,exports){
 var Backbone = require('backbone');
 
 module.exports = Backbone.Model.extend({});
@@ -4384,7 +4384,7 @@ module.exports = Backbone.Model.extend({});
 
 },{"underscore":7}],7:[function(require,module,exports){
 module.exports=require(5)
-},{"E:\\Documents\\ProyectosFree\\PushBullet_Mirror\\chrome-extension\\js\\node_modules\\backbone.paginator\\node_modules\\underscore\\underscore.js":5}],8:[function(require,module,exports){
+},{"/home/edgar/Documentos/ProyectosFree/PushBullet_Mirror/chrome-extension/js/node_modules/backbone.paginator/node_modules/underscore/underscore.js":5}],8:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v1.11.1
  * http://jquery.com/
@@ -14695,11 +14695,15 @@ return jQuery;
 }));
 
 },{}],9:[function(require,module,exports){
+module.exports=require(5)
+},{"/home/edgar/Documentos/ProyectosFree/PushBullet_Mirror/chrome-extension/js/node_modules/backbone.paginator/node_modules/underscore/underscore.js":5}],10:[function(require,module,exports){
 var Backbone = require('backbone'),
     $ = require('jquery'),
+    _ = require('underscore'),
     PushCollection = require('../collections/push'),
     PushModel = require('../models/push'),
-    PushViewList = require('../views/pushes');
+    PushViewList = require('../views/pushes'),
+    SignInView = require('../views/signin');
 
 module.exports = Backbone.Router.extend({
 
@@ -14716,29 +14720,25 @@ module.exports = Backbone.Router.extend({
 
   main : function(){
     if( ! localStorage.keyCode ){
-      chrome.cookies.get({ url : 'https://www.pushbullet.com', name : 'api_key' },function(cookie){
-        if( cookie && cookie.value.length > 0 ){
-          localStorage['keyCode'] = cookie.value;
-        }
-      });
+      this.getKey();
     }
-    this.connect( localStorage.keyCode );
+    //this.connect();
   },
 
   timeLine : function(){
     console.log("Directo timeLine");
-    this.PushList.viewTimeLine();
+    if( typeof localStorage.keyCode != 'undefined' ){
+      this.PushList.viewTimeLine();
+    }else{
+      this.signIn();
+    }
   },
 
-  connect : function(key){
+  connect : function(){
     var self = this;
-    // if(this.websocket){
-      // this.websocket.close();
-    // }
-    if( key.length > 0 ){
-      this.websocket = new WebSocket('wss://stream.pushbullet.com/websocket/'+key);
+    if( typeof this.key != 'undefined' && this.key.length > 0 ){
+      this.websocket = new WebSocket('wss://stream.pushbullet.com/websocket/'+self.key);
       this.websocket.onopen = function(e){
-        // localStorage['WebSocket'] = true;
         self.websocketOpen(e);
       }
       this.websocket.onmessage = function(e){
@@ -14751,6 +14751,10 @@ module.exports = Backbone.Router.extend({
         localStorage['WebSocket'] = false;
         self.websocketClose(e);
       }
+    }else{
+      _.delay(function(){
+        self.getKey();
+      }, 5000, this);
     }
   },
 
@@ -14771,6 +14775,8 @@ module.exports = Backbone.Router.extend({
         json.push.application_name = 'PushBullet';
       }
       self.pushes.add(new PushModel(json));
+    }else{
+      console.log( json );
     }
   },
 
@@ -14783,9 +14789,26 @@ module.exports = Backbone.Router.extend({
     this.main();
   },
 
+  signIn : function(){
+    var signinView = new SignInView({});
+    signinView.render();
+  },
+
+  getKey : function(){
+    console.log("sin key");
+    var self = this;
+    chrome.cookies.get({ url : 'https://www.pushbullet.com', name : 'api_key' },function(cookie){
+      if( cookie && cookie.value.length > 0 ){
+        localStorage['keyCode'] = cookie.value;
+        self.key = localStorage.keyCode;
+      }
+    });
+    this.connect();
+  }
+
 });
 
-},{"../collections/push":1,"../models/push":3,"../views/pushes":11,"backbone":6,"jquery":8}],10:[function(require,module,exports){
+},{"../collections/push":1,"../models/push":3,"../views/pushes":12,"../views/signin":13,"backbone":6,"jquery":8,"underscore":9}],11:[function(require,module,exports){
 var Backbone = require('backbone'),
     // Handlebars = require('handlebars'),//Se requiere estructurar ya que en chrome-extension no permite la funcion eval() y Handlebars la requiere para compilar el template
     $ = require('jquery');
@@ -14805,8 +14828,6 @@ module.exports = Backbone.View.extend({
   render : function(){
     console.log(this.model.toJSON());
     var push = this.model.toJSON();
-        // template = Handlebars.compile(this.templateHtml),
-        // html = template(push);
     var html = '<img src=';
     if( push.push.icon ){
       html += '"data:image/png;base64,'+push.push.icon+'"';
@@ -14820,7 +14841,7 @@ module.exports = Backbone.View.extend({
 
 });
 
-},{"backbone":6,"jquery":8}],11:[function(require,module,exports){
+},{"backbone":6,"jquery":8}],12:[function(require,module,exports){
 var Backbone = require('backbone'),
     PushModel = require('../models/push'),
     PushView = require('../views/push'),
@@ -14888,4 +14909,29 @@ module.exports = Backbone.View.extend({
 
 });
 
-},{"../models/push":3,"../views/push":10,"backbone":6,"jquery":8}]},{},[2]);
+},{"../models/push":3,"../views/push":11,"backbone":6,"jquery":8}],13:[function(require,module,exports){
+var Backbone = require('backbone'),
+    $ = require('jquery');
+
+module.exports = Backbone.View.extend({
+
+  el : $('#body'),
+
+  events : {
+    'click #signin>span' : 'openWeb'
+  },
+
+  templateHandlebars : '<div id="signin" ><span>Sign In PushBullet</span></div>',
+
+  render : function(){
+    console.log("Entra render sign");
+    this.$el.html(this.templateHandlebars);
+  },
+
+  openWeb : function(){
+    chrome.tabs.create({ 'url': 'https://www.pushbullet.com/' });
+  },
+
+});
+
+},{"backbone":6,"jquery":8}]},{},[2]);
