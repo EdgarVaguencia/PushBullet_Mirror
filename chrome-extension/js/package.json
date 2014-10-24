@@ -4,7 +4,7 @@
   "description": "lista las notificaciones de tus dispositivos a traves de la app PushBullet",
   "main": "main.js",
   "scripts": {
-    "bundle": "browserify main.js -o app.js"
+    "bundle": "browserify main.js -o ../Testing/js/app.js"
   },
   "repository": {
     "type": "git",
