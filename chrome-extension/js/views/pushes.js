@@ -22,7 +22,7 @@ module.exports = Backbone.View.extend({
     }
     this.collection.setSorting('created');
     this.collection.fullCollection.sort();
-    localStorage['pushes'] = JSON.stringify(this.collection.toJSON());
+    localStorage.pushes = JSON.stringify(this.collection.toJSON());
     this.addCount();
   },
 
