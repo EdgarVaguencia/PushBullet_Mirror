@@ -22,8 +22,10 @@ module.exports = Backbone.Router.extend({
   main : function(){
     if( ! localStorage.keyCode ){
       this.getKey();
+    }else{
+      this.key = localStorage.keyCode;
+      this.connect();
     }
-    //this.connect();
   },
 
   timeLine : function(){
