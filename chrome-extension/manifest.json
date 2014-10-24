@@ -2,7 +2,7 @@
   "manifest_version" : 2,
   "name" : "PushTime: Your push in timeline",
   "description" : "Lista de notificaciones de tus dispositivos a traves de la app PushBullet",
-  "version" : "0.1.0",
+  "version" : "0.2.0",
   "browser_action":{
     "default_icon" : "image/icon.png",
     "default_popup" : "index.html"

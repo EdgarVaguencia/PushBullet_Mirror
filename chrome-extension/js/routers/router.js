@@ -25,11 +25,7 @@ module.exports = Backbone.Router.extend({
         }
       });
     }
-    // if( ! localStorage.WebSocket || localStorage.WebSocket == false ){
     this.connect( localStorage.keyCode );
-    // }else{
-      // this.PushList.viewTimeLine();
-    // }
   },
 
   timeLine : function(){
