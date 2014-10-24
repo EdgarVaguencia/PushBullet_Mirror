@@ -11,5 +11,8 @@
   "permissions" : [ "cookies", "https://*.pushbullet.com/", "http://*.pushbullet.com/" ],
   "background" : {
     "scripts" : ["./js/app.js"]
+  },
+  "icons" : {
+    "128" : "image/PushTime.png"
   }
 }
