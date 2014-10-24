@@ -13,6 +13,8 @@
     "scripts" : ["./js/app.js"]
   },
   "icons" : {
-    "128" : "image/PushTime.png"
+    "128" : "image/PushTime128.png",
+    "48" : "image/PushTime48.png",
+    "16" : "image/PushTime16.png"
   }
 }
