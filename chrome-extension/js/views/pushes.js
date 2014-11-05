@@ -17,9 +17,6 @@ module.exports = Backbone.View.extend({
   },
 
   render : function(){
-    if ( localStorage.pushes ){
-      this.collection.reset(JSON.parse(localStorage.pushes))
-    }
     this.collection.setSorting('created');
     this.collection.fullCollection.sort();
     localStorage.pushes = JSON.stringify(this.collection.toJSON());

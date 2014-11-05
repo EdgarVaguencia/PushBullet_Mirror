@@ -17,6 +17,9 @@ module.exports = Backbone.Router.extend({
     this.pushes = new PushCollection();
     this.PushList = new PushViewList({ collection : this.pushes });
     Backbone.history.start({ pushState : true });
+    if( localStorage.pushes ){
+        this.pushes.reset(JSON.parse(localStorage.pushes));
+    }
   },
 
   main : function(){
