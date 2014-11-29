@@ -1,5 +1,4 @@
 var Backbone = require('backbone'),
-    PushModel = require('../models/push'),
     PushView = require('../views/push'),
     $ = require('jquery');
 
@@ -7,34 +6,50 @@ module.exports = Backbone.View.extend({
   el : $('body'),
 
   initialize : function(){
-    this.listenTo(this.collection,'add',this.render,this);
+    this.listenTo(this.collection,'add',this.addCount,this);
+    this.listenTo(this.collection,'remove',this.render,this);
   },
 
   addNew : function(push){
-    var pushModel = new PushModel(push);
-    var pushView = new PushView({model : pushModel});
+    var pushView = new PushView({model : push});
     $('#body').append(pushView.render().el);
   },
 
   render : function(){
-    this.collection.setSorting('created');
-    this.collection.fullCollection.sort();
-    localStorage.pushes = JSON.stringify(this.collection.toJSON());
-    this.addCount();
+    //console.log(this.collection.toJSON());
+    var pushes = [],
+        self = this;
+    this.collection.forEach(function(push){
+      pushes.push(push.toJSON());
+    });
+    localStorage.pushes = JSON.stringify(pushes);
   },
 
   viewTimeLine : function(){
-    if( localStorage.pushes ){
-      var pushes = JSON.parse(localStorage.pushes);
-      var self = this;
+    if( this.collection.length > 0 ){
+      this.collection.forEach(this.addNew,this);
+    }else{
+      console.log(this.collection);
+      console.log(this.collection.models);
+    }
+    /*if( localStorage.pushes ){
+      var pushes = JSON.parse(localStorage.pushes),
+          self = this;
+      console.log(this.collection);
+      this.collection.reset();
+      console.log(this.collection);
       $.each(pushes,function(k,i){
         self.addNew(i);
       });
+    }*/
+    if( this.collection.length == 0 ){
+        this.collection.reset( JSON.parse(localStorage.pushes) );
     }
     this.minusCount();
   },
 
   addCount : function(){
+      console.log("addCount");
     if ( localStorage.count ){
       this.count = localStorage.count;
     }else{
@@ -42,6 +57,7 @@ module.exports = Backbone.View.extend({
     }
     this.count += 1;
     this.setBadge();
+    this.render();
   },
 
   minusCount : function(){

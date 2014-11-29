@@ -5,7 +5,7 @@ var Backbone = require('backbone'),
 module.exports = Backbone.PageableCollection.extend({
   model : Push,
   state : {
-    pageSize : 10,
+    //pageSize : 10,
     order : 1
   },
   mode : 'client'
@@ -14710,11 +14710,11 @@ module.exports = Backbone.Router.extend({
 
   initialize : function(){
     this.pushes = new PushCollection();
+    if( localStorage.pushes ){
+      this.pushes.reset( JSON.parse( localStorage.pushes ) );
+    }
     this.PushList = new PushViewList({ collection : this.pushes });
     Backbone.history.start({ pushState : true });
-    if( localStorage.pushes ){
-        this.pushes.reset(JSON.parse(localStorage.pushes));
-    }
   },
 
   main : function(){
@@ -14727,7 +14727,6 @@ module.exports = Backbone.Router.extend({
   },
 
   timeLine : function(){
-    console.log("Directo timeLine");
     if( typeof localStorage.keyCode != 'undefined' ){
       this.PushList.viewTimeLine();
     }else{
@@ -14775,7 +14774,8 @@ module.exports = Backbone.Router.extend({
       if( !json.push.application_name ){
         json.push.application_name = 'PushBullet';
       }
-      self.pushes.add(new PushModel(json));
+      self.pushes.unshift(new PushModel(json));
+      console.log(self.pushes.length);
     }else{
       console.log( json );
     }
@@ -14820,16 +14820,20 @@ module.exports = Backbone.View.extend({
 
   classname : 'push',
 
-  templateHtml : '<img src="{{#if push.icon}}data:image/png;base64,{{push.icon}}{{else}}https://blog.pushbullet.com/images/iphone_app_update_1/icon2.png{{/if}}" /><h1>{{push.title}}</h1><p class="pushBody">{{push.body}}</p><p class="details"><span class="application">{{push.application_name}}</span><span class="date">{{created}}</span></p>',
+  events : {
+      'click .remove' : 'removeItem',
+  },
+
+  templateHtml : '<span class="remove"></span><img src="{{#if push.icon}}data:image/png;base64,{{push.icon}}{{else}}https://blog.pushbullet.com/images/iphone_app_update_1/icon2.png{{/if}}" /><h1>{{push.title}}</h1><p class="pushBody">{{push.body}}</p><p class="details"><span class="application">{{push.application_name}}</span><span class="date">{{created}}</span></p>',
 
   initialize : function(){
     this.listenTo(this.model,'change',this.render,this);
   },
 
   render : function(){
-    console.log(this.model.toJSON());
+    //console.log(this.model.toJSON());
     var push = this.model.toJSON();
-    var html = '<img src=';
+    var html = '<span class="remove"> x </span><img src=';
     if( push.push.icon ){
       html += '"data:image/png;base64,'+push.push.icon+'"';
     }else{
@@ -14840,11 +14844,20 @@ module.exports = Backbone.View.extend({
     return this;
   },
 
+  removeItem : function(){
+    //console.log("removeItem");
+    console.log(this.model);
+    console.log(Backbone.app.pushes);
+    Backbone.app.pushes.remove(this.model);
+    console.log(Backbone.app.pushes.get(this.model.cid));
+    console.log(Backbone.app.pushes);
+    this.model.destroy();
+  },
+
 });
 
 },{"backbone":5,"jquery":6}],10:[function(require,module,exports){
 var Backbone = require('backbone'),
-    PushModel = require('../models/push'),
     PushView = require('../views/push'),
     $ = require('jquery');
 
@@ -14852,34 +14865,50 @@ module.exports = Backbone.View.extend({
   el : $('body'),
 
   initialize : function(){
-    this.listenTo(this.collection,'add',this.render,this);
+    this.listenTo(this.collection,'add',this.addCount,this);
+    this.listenTo(this.collection,'remove',this.render,this);
   },
 
   addNew : function(push){
-    var pushModel = new PushModel(push);
-    var pushView = new PushView({model : pushModel});
+    var pushView = new PushView({model : push});
     $('#body').append(pushView.render().el);
   },
 
   render : function(){
-    this.collection.setSorting('created');
-    this.collection.fullCollection.sort();
-    localStorage.pushes = JSON.stringify(this.collection.toJSON());
-    this.addCount();
+    //console.log(this.collection.toJSON());
+    var pushes = [],
+        self = this;
+    this.collection.forEach(function(push){
+      pushes.push(push.toJSON());
+    });
+    localStorage.pushes = JSON.stringify(pushes);
   },
 
   viewTimeLine : function(){
-    if( localStorage.pushes ){
-      var pushes = JSON.parse(localStorage.pushes);
-      var self = this;
+    if( this.collection.length > 0 ){
+      this.collection.forEach(this.addNew,this);
+    }else{
+      console.log(this.collection);
+      console.log(this.collection.models);
+    }
+    /*if( localStorage.pushes ){
+      var pushes = JSON.parse(localStorage.pushes),
+          self = this;
+      console.log(this.collection);
+      this.collection.reset();
+      console.log(this.collection);
       $.each(pushes,function(k,i){
         self.addNew(i);
       });
+    }*/
+    if( this.collection.length == 0 ){
+        this.collection.reset( JSON.parse(localStorage.pushes) );
     }
     this.minusCount();
   },
 
   addCount : function(){
+      console.log("addCount");
     if ( localStorage.count ){
       this.count = localStorage.count;
     }else{
@@ -14887,6 +14916,7 @@ module.exports = Backbone.View.extend({
     }
     this.count += 1;
     this.setBadge();
+    this.render();
   },
 
   minusCount : function(){
@@ -14907,7 +14937,7 @@ module.exports = Backbone.View.extend({
 
 });
 
-},{"../models/push":3,"../views/push":9,"backbone":5,"jquery":6}],11:[function(require,module,exports){
+},{"../views/push":9,"backbone":5,"jquery":6}],11:[function(require,module,exports){
 var Backbone = require('backbone'),
     $ = require('jquery');
 

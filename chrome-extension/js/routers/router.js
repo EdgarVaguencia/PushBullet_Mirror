@@ -15,11 +15,11 @@ module.exports = Backbone.Router.extend({
 
   initialize : function(){
     this.pushes = new PushCollection();
+    if( localStorage.pushes ){
+      this.pushes.reset( JSON.parse( localStorage.pushes ) );
+    }
     this.PushList = new PushViewList({ collection : this.pushes });
     Backbone.history.start({ pushState : true });
-    if( localStorage.pushes ){
-        this.pushes.reset(JSON.parse(localStorage.pushes));
-    }
   },
 
   main : function(){
@@ -32,7 +32,6 @@ module.exports = Backbone.Router.extend({
   },
 
   timeLine : function(){
-    console.log("Directo timeLine");
     if( typeof localStorage.keyCode != 'undefined' ){
       this.PushList.viewTimeLine();
     }else{
@@ -80,7 +79,8 @@ module.exports = Backbone.Router.extend({
       if( !json.push.application_name ){
         json.push.application_name = 'PushBullet';
       }
-      self.pushes.add(new PushModel(json));
+      self.pushes.unshift(new PushModel(json));
+      console.log(self.pushes.length);
     }else{
       console.log( json );
     }
